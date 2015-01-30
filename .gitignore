@@ -1,0 +1,25 @@
+# Patch/diff artifacts
+*.patch
+*.diff
+*.orig
+*.rej
+interdiff*.txt
+# emacs artifacts
+*~
+\#*\#
+# VI swap file
+*.swp
+# Hidden files
+.DS*
+.project
+# Windows links
+*.lnk
+# Temporary files
+tmp*
+# IDE project directory
+nbproject
+.idea
+# Node.js modules directory
+node_modules/
+# Bower components directory
+bower_components/
