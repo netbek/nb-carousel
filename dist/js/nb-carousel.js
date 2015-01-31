@@ -427,13 +427,15 @@
 				var width = $element[0].scrollWidth;
 				var height = Math.min(windowHeight, maxHeight / maxWidth * width);
 
-				// Set height of carousel.
-				$element.css('height', height + 'px');
+				if (width && height) {
+					// Set height of carousel.
+					$element.css('height', height + 'px');
 
-				// Set width and height of slides.
-				angular.forEach($scope.slides, function (slide) {
-					slide.resize(width, height);
-				});
+					// Set width and height of slides.
+					angular.forEach($scope.slides, function (slide) {
+						slide.resize(width, height);
+					});
+				}
 			}
 		}
 
@@ -448,6 +450,7 @@
 					$scope.pause();
 				}
 				else {
+					resize(false);
 					$scope.goto(0);
 					$scope.play();
 				}
