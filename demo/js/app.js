@@ -42,6 +42,39 @@
 					xlarge: 'http://lorempixel.com/1920/1440/abstract/2',
 					xxlarge: 'http://lorempixel.com/3840/2880/abstract/2'
 				}
+			},
+			{
+				width: 960,
+				height: 720,
+				styles: {
+					small: 'http://lorempixel.com/240/180/abstract/3',
+					medium: 'http://lorempixel.com/480/360/abstract/3',
+					large: 'http://lorempixel.com/960/720/abstract/3',
+					xlarge: 'http://lorempixel.com/1920/1440/abstract/3',
+					xxlarge: 'http://lorempixel.com/3840/2880/abstract/3'
+				}
+			},
+			{
+				width: 960,
+				height: 720,
+				styles: {
+					small: 'http://lorempixel.com/240/180/abstract/4',
+					medium: 'http://lorempixel.com/480/360/abstract/4',
+					large: 'http://lorempixel.com/960/720/abstract/4',
+					xlarge: 'http://lorempixel.com/1920/1440/abstract/4',
+					xxlarge: 'http://lorempixel.com/3840/2880/abstract/4'
+				}
+			},
+			{
+				width: 720,
+				height: 960,
+				styles: {
+					small: 'http://lorempixel.com/180/240/abstract/5',
+					medium: 'http://lorempixel.com/360/480/abstract/5',
+					large: 'http://lorempixel.com/720/960/abstract/5',
+					xlarge: 'http://lorempixel.com/1440/1920/abstract/5',
+					xxlarge: 'http://lorempixel.com/2880/3840/abstract/5'
+				}
 			}
 		];
 	}
