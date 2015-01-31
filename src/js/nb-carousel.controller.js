@@ -253,7 +253,7 @@
 		self.removeSlide = function (slide) {
 			GSAP.TweenMax.killTweensOf(slide.$element);
 
-			var index = $scope.slides.indexOf(slide);
+			var index = _.indexOf($scope.slides, slide);
 			$scope.slides.splice(index, 1);
 
 			if ($scope.slides.length > 0 && slide.active) {
