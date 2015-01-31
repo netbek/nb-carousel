@@ -13,8 +13,8 @@
 		.module('nb.carousel')
 		.controller('nbCarouselController', nbCarouselController);
 
-	nbCarouselController.$inject = ['$scope', '$element', '$timeout', '$interval', '$animate', 'GSAP', 'nbCarouselConfig', '$window', 'nbWindow', '$document'];
-	function nbCarouselController ($scope, $element, $timeout, $interval, $animate, GSAP, nbCarouselConfig, $window, nbWindow, $document) {
+	nbCarouselController.$inject = ['$scope', '$element', '$timeout', '$interval', '$animate', 'GSAP', '$window', 'nbWindow'];
+	function nbCarouselController ($scope, $element, $timeout, $interval, $animate, GSAP, $window, nbWindow) {
 		var self = this;
 		var $$window = angular.element($window);
 		var deregister = [];
