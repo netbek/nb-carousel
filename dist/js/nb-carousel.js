@@ -15,7 +15,9 @@
 			'ngAnimate',
 			'nb.gsap',
 			'nb.lodash',
-			'nb.window'
+			'nb.throbber',
+			'nb.window',
+			'nb.carousel.templates'
 		]);
 })(window, window.angular);
 
@@ -139,7 +141,7 @@
 
 		var maxWidth = 0, maxHeight = 0;
 
-		$scope.loaded = false; // Whether all slides have loaded.
+		$scope.complete = false; // Whether all slides have loaded or failed to load.
 		$scope.slides = [];
 		$scope.direction = self.direction = 'left';
 		$scope.currentIndex = -1;
@@ -162,8 +164,6 @@
 		$scope.goto = function (index, direction) {
 			cancelDeferGoto();
 
-			console.log('goto', $scope.currentIndex, index, direction);
-
 			// Stop here if there is a transition in progress or if the index has not changed.
 			if (transition || $scope.currentIndex === index) {
 				return;
@@ -172,10 +172,8 @@
 			oldSlide = $scope.slides[$scope.currentIndex];
 			newSlide = $scope.slides[index];
 
-			console.log('goto', newSlide.loaded);
-
 			// Stop here if the slide is not loaded.
-			if (!newSlide.loaded) {
+			if (!newSlide.complete) {
 				// Periodically check if the slide is loaded, and then try goto() again.
 				deferGoto(index, direction);
 				return;
@@ -219,8 +217,6 @@
 		 * @param {string} direction left, right
 		 */
 		function deferGoto (index, direction) {
-			console.log('deferGoto', index, direction);
-
 			deferGotoIndex = index;
 			deferGotoDirection = direction;
 			deferGotoFn();
@@ -230,11 +226,9 @@
 		 * Periodically checks if a slide is loaded. If so, fires goto().
 		 */
 		function deferGotoFn () {
-			console.log('deferGotoFn');
-
 			cancelDeferGoto();
 
-			if ($scope.slides[deferGotoIndex].loaded) {
+			if ($scope.slides[deferGotoIndex].complete) {
 				$scope.goto(deferGotoIndex, deferGotoDirection);
 			}
 			else {
@@ -323,8 +317,6 @@
 		}
 
 		$scope.play = function () {
-			console.log('play');
-
 			if (!self.isPlaying) {
 				$scope.isPlaying = self.isPlaying = true;
 				restartTimer();
@@ -332,8 +324,6 @@
 		};
 
 		$scope.pause = function () {
-			console.log('pause');
-
 			if (!$scope.noPause) {
 				$scope.isPlaying = self.isPlaying = false;
 				cancelTimer();
@@ -389,17 +379,17 @@
 		 *
 		 * @param {Scope} slide
 		 */
-		self.setLoaded = function (slide) {
+		self.setSlideComplete = function (slide) {
 			var length = $scope.slides.length;
 			var i = 0;
 
 			angular.forEach($scope.slides, function (slide) {
-				if (slide.loaded) {
+				if (slide.complete) {
 					i++;
 				}
 			});
 
-			$scope.loaded = (length === i);
+			$scope.complete = (length === i);
 		};
 
 		/**
@@ -503,13 +493,12 @@
 		.directive('nbCarousel', nbCarouselDirective);
 
 	function nbCarouselDirective () {
-		var now = (new Date).getTime();
 		return {
 			restrict: 'EA',
 			transclude: true,
 			replace: true,
 			controller: 'nbCarouselController',
-			templateUrl: 'templates/nb-carousel.html' + '?t=' + now,
+			templateUrl: 'templates/nb-carousel.html',
 			scope: {
 				interval: '=',
 				noTransition: '=',
@@ -569,13 +558,12 @@
 
 	nbCarouselSlideDirective.$inject = ['$timeout'];
 	function nbCarouselSlideDirective ($timeout) {
-		var now = (new Date).getTime();
 		return {
 			require: '^nbCarousel',
 			restrict: 'EA',
 			transclude: true,
 			replace: true,
-			templateUrl: 'templates/nb-carousel-slide.html' + '?t=' + now,
+			templateUrl: 'templates/nb-carousel-slide.html',
 			scope: {
 				active: '=?'
 			},
@@ -583,7 +571,7 @@
 				var deregister = [];
 				var picture = element.find('picture').scope();
 
-				scope.loaded = false;
+				scope.complete = false; // Whether image has loaded or failed to load.
 
 				// Gives the $animate service access to carousel properties.
 				scope.direction = function () {
@@ -601,26 +589,12 @@
 					picture.resize(width, height);
 				};
 
-				function getRandomInt (min, max) {
-					return Math.floor(Math.random() * (max - min)) + min;
-				}
-
 				// One-time watches.
 				(function () {
-					var watch = picture.$watch('loaded', function (value) {
+					var watch = picture.$watch('complete', function (value) {
 						if (value) {
-//							scope.loaded = value;
-//							controller.setLoaded(scope);
-
-							// Simulate slow loading...
-							var delay = getRandomInt(0, 5) * 1000;
-							console.log('delay', delay);
-
-							$timeout(function () {
-								scope.loaded = value;
-								controller.setLoaded(scope);
-							}, delay);
-
+							scope.complete = value;
+							controller.setSlideComplete(scope);
 							watch();
 						}
 					});
@@ -675,36 +649,15 @@
 
 	angular
 		.module('nb.carousel')
-		.directive('nbCarouselSlidePicture', nbCarouselSlideDirectivePicture);
+		.directive('nbCarouselSlidePicture', nbCarouselSlidePictureDirective);
 
-	nbCarouselSlideDirectivePicture.$inject = ['$timeout', '_'];
-	function nbCarouselSlideDirectivePicture ($timeout, _) {
+	nbCarouselSlidePictureDirective.$inject = ['$timeout', '_'];
+	function nbCarouselSlidePictureDirective ($timeout, _) {
 		return {
 			restrict: 'EA',
 			link: function (scope, element, attrs) {
-				var loadCheckTimeout;
-
-				scope.loaded = false;
 				scope.sourceWidth = 0;
 				scope.sourceHeight = 0;
-
-				function loadCheck () {
-					cancelLoadCheck();
-
-					if (scope.isLoaded()) {
-						scope.loaded = true;
-					}
-					else {
-						scope.loaded = false;
-						loadCheckTimeout = $timeout(loadCheck, 50);
-					}
-				}
-
-				function cancelLoadCheck () {
-					if (loadCheckTimeout) {
-						$timeout.cancel(loadCheckTimeout);
-					}
-				}
 
 				scope.resize = function (width, height) {
 					if (scope.sourceWidth && scope.sourceHeight) {
@@ -718,10 +671,6 @@
 					}
 				};
 
-				scope.$on('$destroy', function () {
-					cancelLoadCheck();
-				});
-
 				attrs.$observe('source-width', function (value) {
 					if (value) {
 						scope.sourceWidth = Number(value);
@@ -732,14 +681,12 @@
 						scope.sourceHeight = Number(value);
 					}
 				});
-
-				loadCheck();
 			}
 		};
 	}
 })(window, window.angular);
 
-angular.module('nb.stopwatch.templates', ['templates/nb-carousel-slide.html', 'templates/nb-carousel.html']);
+angular.module('nb.carousel.templates', ['templates/nb-carousel-slide.html', 'templates/nb-carousel.html']);
 
 angular.module("templates/nb-carousel-slide.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("templates/nb-carousel-slide.html",
@@ -761,7 +708,7 @@ angular.module("templates/nb-carousel.html", []).run(["$templateCache", function
     "			ng-click=\"goto($index);\"></li>\n" +
     "	</ol>\n" +
     "\n" +
-    "	<div ng-hide=\"loaded\" class=\"spinner\"></div>\n" +
+    "	<div ng-hide=\"complete\" nb-throbber></div>\n" +
     "\n" +
     "	<a class=\"left carousel-control\"\n" +
     "	   ng-click=\"prev()\"\n" +

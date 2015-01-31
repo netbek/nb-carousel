@@ -37,7 +37,7 @@ module.exports = function (grunt) {
 		html2js: {
 			dist: {
 				options: {
-					module: 'nb.stopwatch.templates',
+					module: 'nb.carousel.templates',
 				},
 				files: [{
 						src: ['src/templates/*.html'],

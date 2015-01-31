@@ -18,29 +18,8 @@
 		return {
 			restrict: 'EA',
 			link: function (scope, element, attrs) {
-				var loadCheckTimeout;
-
-				scope.loaded = false;
 				scope.sourceWidth = 0;
 				scope.sourceHeight = 0;
-
-				function loadCheck () {
-					cancelLoadCheck();
-
-					if (scope.isLoaded()) {
-						scope.loaded = true;
-					}
-					else {
-						scope.loaded = false;
-						loadCheckTimeout = $timeout(loadCheck, 50);
-					}
-				}
-
-				function cancelLoadCheck () {
-					if (loadCheckTimeout) {
-						$timeout.cancel(loadCheckTimeout);
-					}
-				}
 
 				scope.resize = function (width, height) {
 					if (scope.sourceWidth && scope.sourceHeight) {
@@ -54,10 +33,6 @@
 					}
 				};
 
-				scope.$on('$destroy', function () {
-					cancelLoadCheck();
-				});
-
 				attrs.$observe('source-width', function (value) {
 					if (value) {
 						scope.sourceWidth = Number(value);
@@ -68,8 +43,6 @@
 						scope.sourceHeight = Number(value);
 					}
 				});
-
-				loadCheck();
 			}
 		};
 	}

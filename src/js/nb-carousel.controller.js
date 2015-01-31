@@ -34,7 +34,7 @@
 
 		var maxWidth = 0, maxHeight = 0;
 
-		$scope.loaded = false; // Whether all slides have loaded.
+		$scope.complete = false; // Whether all slides have loaded or failed to load.
 		$scope.slides = [];
 		$scope.direction = self.direction = 'left';
 		$scope.currentIndex = -1;
@@ -57,8 +57,6 @@
 		$scope.goto = function (index, direction) {
 			cancelDeferGoto();
 
-			console.log('goto', $scope.currentIndex, index, direction);
-
 			// Stop here if there is a transition in progress or if the index has not changed.
 			if (transition || $scope.currentIndex === index) {
 				return;
@@ -67,10 +65,8 @@
 			oldSlide = $scope.slides[$scope.currentIndex];
 			newSlide = $scope.slides[index];
 
-			console.log('goto', newSlide.loaded);
-
 			// Stop here if the slide is not loaded.
-			if (!newSlide.loaded) {
+			if (!newSlide.complete) {
 				// Periodically check if the slide is loaded, and then try goto() again.
 				deferGoto(index, direction);
 				return;
@@ -114,8 +110,6 @@
 		 * @param {string} direction left, right
 		 */
 		function deferGoto (index, direction) {
-			console.log('deferGoto', index, direction);
-
 			deferGotoIndex = index;
 			deferGotoDirection = direction;
 			deferGotoFn();
@@ -125,11 +119,9 @@
 		 * Periodically checks if a slide is loaded. If so, fires goto().
 		 */
 		function deferGotoFn () {
-			console.log('deferGotoFn');
-
 			cancelDeferGoto();
 
-			if ($scope.slides[deferGotoIndex].loaded) {
+			if ($scope.slides[deferGotoIndex].complete) {
 				$scope.goto(deferGotoIndex, deferGotoDirection);
 			}
 			else {
@@ -218,8 +210,6 @@
 		}
 
 		$scope.play = function () {
-			console.log('play');
-
 			if (!self.isPlaying) {
 				$scope.isPlaying = self.isPlaying = true;
 				restartTimer();
@@ -227,8 +217,6 @@
 		};
 
 		$scope.pause = function () {
-			console.log('pause');
-
 			if (!$scope.noPause) {
 				$scope.isPlaying = self.isPlaying = false;
 				cancelTimer();
@@ -284,17 +272,17 @@
 		 *
 		 * @param {Scope} slide
 		 */
-		self.setLoaded = function (slide) {
+		self.setSlideComplete = function (slide) {
 			var length = $scope.slides.length;
 			var i = 0;
 
 			angular.forEach($scope.slides, function (slide) {
-				if (slide.loaded) {
+				if (slide.complete) {
 					i++;
 				}
 			});
 
-			$scope.loaded = (length === i);
+			$scope.complete = (length === i);
 		};
 
 		/**

@@ -14,13 +14,12 @@
 		.directive('nbCarousel', nbCarouselDirective);
 
 	function nbCarouselDirective () {
-		var now = (new Date).getTime();
 		return {
 			restrict: 'EA',
 			transclude: true,
 			replace: true,
 			controller: 'nbCarouselController',
-			templateUrl: 'templates/nb-carousel.html' + '?t=' + now,
+			templateUrl: 'templates/nb-carousel.html',
 			scope: {
 				interval: '=',
 				noTransition: '=',

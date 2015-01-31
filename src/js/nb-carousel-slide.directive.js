@@ -15,13 +15,12 @@
 
 	nbCarouselSlideDirective.$inject = ['$timeout'];
 	function nbCarouselSlideDirective ($timeout) {
-		var now = (new Date).getTime();
 		return {
 			require: '^nbCarousel',
 			restrict: 'EA',
 			transclude: true,
 			replace: true,
-			templateUrl: 'templates/nb-carousel-slide.html' + '?t=' + now,
+			templateUrl: 'templates/nb-carousel-slide.html',
 			scope: {
 				active: '=?'
 			},
@@ -29,7 +28,7 @@
 				var deregister = [];
 				var picture = element.find('picture').scope();
 
-				scope.loaded = false;
+				scope.complete = false; // Whether image has loaded or failed to load.
 
 				// Gives the $animate service access to carousel properties.
 				scope.direction = function () {
@@ -47,26 +46,12 @@
 					picture.resize(width, height);
 				};
 
-				function getRandomInt (min, max) {
-					return Math.floor(Math.random() * (max - min)) + min;
-				}
-
 				// One-time watches.
 				(function () {
-					var watch = picture.$watch('loaded', function (value) {
+					var watch = picture.$watch('complete', function (value) {
 						if (value) {
-//							scope.loaded = value;
-//							controller.setLoaded(scope);
-
-							// Simulate slow loading...
-							var delay = getRandomInt(0, 5) * 1000;
-							console.log('delay', delay);
-
-							$timeout(function () {
-								scope.loaded = value;
-								controller.setLoaded(scope);
-							}, delay);
-
+							scope.complete = value;
+							controller.setSlideComplete(scope);
 							watch();
 						}
 					});

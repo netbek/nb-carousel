@@ -11,7 +11,7 @@
 			ng-click="goto($index);"></li>
 	</ol>
 
-	<div ng-hide="loaded" class="spinner"></div>
+	<div ng-hide="complete" nb-throbber></div>
 
 	<a class="left carousel-control"
 	   ng-click="prev()"

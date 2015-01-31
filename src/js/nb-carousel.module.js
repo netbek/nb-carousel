@@ -15,6 +15,8 @@
 			'ngAnimate',
 			'nb.gsap',
 			'nb.lodash',
-			'nb.window'
+			'nb.throbber',
+			'nb.window',
+			'nb.carousel.templates'
 		]);
 })(window, window.angular);

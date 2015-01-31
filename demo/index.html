@@ -1,52 +1,57 @@
 <!doctype html>
-<html xmlns:ng="http://angularjs.org" lang="en" id="ng-app" ng-app="nb.stopwatch.demo">
+<html xmlns:ng="http://angularjs.org" lang="en" id="ng-app" ng-app="nb.carousel.demo">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>nb-carousel demo</title>
+
+		<link rel="stylesheet" href="../bower_components/nb-foundation/src/css/nb-foundation-base.css" />
+		<link rel="stylesheet" href="../bower_components/normalize-css/normalize.css" />
+		<link rel="stylesheet" href="../bower_components/nb-foundation/src/css/nb-foundation-main.css" />
+		<link rel="stylesheet" href="../bower_components/nb-throbber/dist/css/nb-throbber.css" />
 		<link rel="stylesheet" href="../dist/css/nb-carousel.min.css" />
+		<link rel="stylesheet" href="css/app.css" />
+
 		<script src="../bower_components/angular/angular.js"></script>
 		<script src="../bower_components/angular-animate/angular-animate.js"></script>
 		<script src="../bower_components/angular-bindonce/bindonce.js"></script>
 		<script src="../bower_components/gsap/src/uncompressed/TweenMax.js"></script>
 		<script src="../bower_components/lodash/dist/lodash.js"></script>
 		<script src="../bower_components/merge/merge.js"></script>
-
+		<script src="../bower_components/modernizr/index.js"></script>
+		<script src="../bower_components/picturefill/dist/picturefill.js"></script>
 		<script src="../bower_components/nb-gsap/dist/js/nb-gsap.js"></script>
+		<script src="../bower_components/nb-i18n/dist/js/nb-i18n.js"></script>
 		<script src="../bower_components/nb-lodash/dist/js/nb-lodash.js"></script>
+		<script src="../bower_components/nb-modernizr/dist/js/nb-modernizr.js"></script>
+		<script src="../bower_components/nb-picturefill/dist/js/nb-picturefill.js"></script>
+		<script src="../bower_components/nb-throbber/dist/js/nb-throbber.js"></script>
 		<script src="../bower_components/nb-window/dist/js/nb-window.js"></script>
-
-		<!--<script src="../dist/js/nb-carousel.min.js"></script>-->
-
-		<script src="../src/js/nb-carousel.module.js"></script>
-		<script src="../src/js/nb-carousel.animation.js"></script>
-		<script src="../src/js/nb-carousel.controller.js"></script>
-		<script src="../src/js/nb-carousel.directive.js"></script>
-		<script src="../src/js/nb-carousel-config.service.js"></script>
-		<script src="../src/js/nb-carousel-slide.directive.js"></script>
-		<script src="../src/js/nb-carousel-slide-picture.directive.js"></script>
-
+		<script src="../dist/js/nb-carousel.min.js"></script>
 		<script src="js/app.js"></script>
 	</head>
 	<body ng-controller="MainController">
-		<div nb-carousel
-			 transition-duration="0.75"
-			 transition-ease="easeOutPower2"
-			 no-transition="0"
-			 interval="5000"
-			 style="height: 200px;">
-			<div nb-carousel-slide
-				 bindonce
-				 ng-repeat="file in files">
-				<span nb-picturefill
-					  nb-carousel-slide-picture
-					  bo-attr
-					  bo-attr-alt="file.alt"
-					  bo-attr-source-width="file.width"
-					  bo-attr-source-height="file.height"
-					  bo-attr-default="file.styles.medium + ', ' + file.styles.large + ' 2x'"
-					  bo-attr-sources="'[[\'' + file.styles.large + ', ' + file.styles.xlarge + ' 2x\', \'large\']]'"></span>
+
+		<div class="carousel-wrapper">
+			<div nb-carousel
+				 transition-duration="0.75"
+				 transition-ease="easeOutPower2"
+				 no-transition="0"
+				 interval="2000">
+				<div nb-carousel-slide
+					 bindonce
+					 ng-repeat="slide in slides">
+					<span nb-picturefill
+						  nb-carousel-slide-picture
+						  bo-attr
+						  bo-attr-alt="slide.alt"
+						  bo-attr-source-width="slide.width"
+						  bo-attr-source-height="slide.height"
+						  bo-attr-default="slide.styles.medium + ', ' + slide.styles.large + ' 2x'"
+						  bo-attr-sources="'[[\'' + slide.styles.large + ', ' + slide.styles.xlarge + ' 2x\', \'large\']]'"></span>
+				</div>
 			</div>
 		</div>
+
 	</body>
 </html>
