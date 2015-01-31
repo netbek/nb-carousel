@@ -443,11 +443,14 @@
 		}, function (newValue) {
 			$scope.disabled = self.disabled = newValue;
 
-			if (newValue) {
-				$scope.pause();
-			}
-			else {
-				$scope.play();
+			if ($scope.slides.length > 0) {
+				if (newValue) {
+					$scope.pause();
+				}
+				else {
+					$scope.goto(0);
+					$scope.play();
+				}
 			}
 		}));
 
