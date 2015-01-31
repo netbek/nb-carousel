@@ -13,8 +13,8 @@
 		.module('nb.carousel')
 		.directive('nbCarouselSlidePicture', nbCarouselSlidePictureDirective);
 
-	nbCarouselSlidePictureDirective.$inject = ['$timeout', '_'];
-	function nbCarouselSlidePictureDirective ($timeout, _) {
+	nbCarouselSlidePictureDirective.$inject = ['_'];
+	function nbCarouselSlidePictureDirective (_) {
 		return {
 			restrict: 'EA',
 			link: function (scope, element, attrs) {
