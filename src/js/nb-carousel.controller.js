@@ -343,6 +343,7 @@
 					$scope.pause();
 				}
 				else {
+					resize(false);
 					$scope.goto(0);
 					$scope.play();
 				}
