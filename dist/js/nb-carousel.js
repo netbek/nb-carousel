@@ -120,9 +120,10 @@
 		.module('nb.carousel')
 		.controller('nbCarouselController', nbCarouselController);
 
-	nbCarouselController.$inject = ['$scope', '$element', '$timeout', '$interval', '$animate', 'GSAP', 'nbCarouselConfig', '$window', 'nbWindow', '$document'];
-	function nbCarouselController ($scope, $element, $timeout, $interval, $animate, GSAP, nbCarouselConfig, $window, nbWindow, $document) {
+	nbCarouselController.$inject = ['$scope', '$element', '$timeout', '$interval', '$animate', 'GSAP', '$window', 'nbWindow', '_'];
+	function nbCarouselController ($scope, $element, $timeout, $interval, $animate, GSAP, $window, nbWindow, _) {
 		var self = this;
+		var $$window = angular.element($window);
 		var deregister = [];
 		var timeouts = [];
 		var currentInterval; // promise
@@ -146,6 +147,7 @@
 		$scope.direction = self.direction = 'left';
 		$scope.currentIndex = -1;
 		$scope.isPlaying = self.isPlaying = false;
+		$scope.disabled = self.disabled = false;
 
 		/**
 		 *
@@ -342,7 +344,7 @@
 			if ($scope.slides.length === 1 || slide.active) {
 				$scope.goto($scope.slides.length - 1);
 
-				if ($scope.slides.length == 1) {
+				if ($scope.slides.length == 1 && !self.disabled) {
 					$scope.play();
 				}
 			}
@@ -419,7 +421,7 @@
 		/**
 		 * Resizes carousel and slides.
 		 */
-		function resize () {
+		function resize (apply) {
 			if (maxWidth && maxHeight) {
 				var windowHeight = nbWindow.windowHeight() * 0.8;
 				var width = $element[0].scrollWidth;
@@ -435,6 +437,20 @@
 			}
 		}
 
+		// Disable (pause) the carousel if the element is hidden.
+		deregister.push($scope.$watch(function setDisabled () {
+			return $element.hasClass('ng-hide');
+		}, function (newValue) {
+			$scope.disabled = self.disabled = newValue;
+
+			if (newValue) {
+				$scope.pause();
+			}
+			else {
+				$scope.play();
+			}
+		}));
+
 		// Reset the timer when the interval property changes.
 		deregister.push($scope.$watch('interval', restartTimer));
 
@@ -449,8 +465,12 @@
 			self.transitionEase = value;
 		}));
 
+		var onWindowResize = _.throttle(function () {
+			resize(true);
+		}, 60);
+
 		// On window resize, resize carousel and slides.
-		angular.element($window).on('resize', resize);
+		$$window.on('resize', onWindowResize);
 
 		$scope.$on('$destroy', function () {
 			destroyed = true;
@@ -472,7 +492,9 @@
 			cancelTimer();
 
 			// Unbind window resize event listener.
-			angular.element($window).off('resize', resize);
+			$$window.off('resize', onWindowResize);
+
+			onWindowResize.cancel();
 		});
 	}
 })(window, window.angular);
@@ -556,8 +578,7 @@
 		.module('nb.carousel')
 		.directive('nbCarouselSlide', nbCarouselSlideDirective);
 
-	nbCarouselSlideDirective.$inject = ['$timeout'];
-	function nbCarouselSlideDirective ($timeout) {
+	function nbCarouselSlideDirective () {
 		return {
 			require: '^nbCarousel',
 			restrict: 'EA',
@@ -651,8 +672,8 @@
 		.module('nb.carousel')
 		.directive('nbCarouselSlidePicture', nbCarouselSlidePictureDirective);
 
-	nbCarouselSlidePictureDirective.$inject = ['$timeout', '_'];
-	function nbCarouselSlidePictureDirective ($timeout, _) {
+	nbCarouselSlidePictureDirective.$inject = ['_'];
+	function nbCarouselSlidePictureDirective (_) {
 		return {
 			restrict: 'EA',
 			link: function (scope, element, attrs) {
