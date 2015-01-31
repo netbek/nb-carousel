@@ -13,8 +13,7 @@
 		.module('nb.carousel')
 		.directive('nbCarouselSlide', nbCarouselSlideDirective);
 
-	nbCarouselSlideDirective.$inject = ['$timeout'];
-	function nbCarouselSlideDirective ($timeout) {
+	function nbCarouselSlideDirective () {
 		return {
 			require: '^nbCarousel',
 			restrict: 'EA',
