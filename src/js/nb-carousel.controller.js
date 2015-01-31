@@ -16,6 +16,7 @@
 	nbCarouselController.$inject = ['$scope', '$element', '$timeout', '$interval', '$animate', 'GSAP', 'nbCarouselConfig', '$window', 'nbWindow', '$document'];
 	function nbCarouselController ($scope, $element, $timeout, $interval, $animate, GSAP, nbCarouselConfig, $window, nbWindow, $document) {
 		var self = this;
+		var $$window = angular.element($window);
 		var deregister = [];
 		var timeouts = [];
 		var currentInterval; // promise
@@ -313,7 +314,7 @@
 		/**
 		 * Resizes carousel and slides.
 		 */
-		function resize () {
+		function resize (apply) {
 			if (maxWidth && maxHeight) {
 				var windowHeight = nbWindow.windowHeight() * 0.8;
 				var width = $element[0].scrollWidth;
@@ -357,8 +358,12 @@
 			self.transitionEase = value;
 		}));
 
+		var onWindowResize = _.throttle(function () {
+			resize(true);
+		}, 60);
+
 		// On window resize, resize carousel and slides.
-		angular.element($window).on('resize', resize);
+		$$window.on('resize', onWindowResize);
 
 		$scope.$on('$destroy', function () {
 			destroyed = true;
@@ -380,7 +385,9 @@
 			cancelTimer();
 
 			// Unbind window resize event listener.
-			angular.element($window).off('resize', resize);
+			$$window.off('resize', onWindowResize);
+
+			onWindowResize.cancel();
 		});
 	}
 })(window, window.angular);
