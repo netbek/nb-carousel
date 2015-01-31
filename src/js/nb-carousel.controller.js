@@ -386,8 +386,6 @@
 
 			// Unbind window resize event listener.
 			$$window.off('resize', onWindowResize);
-
-			onWindowResize.cancel();
 		});
 	}
 })(window, window.angular);
