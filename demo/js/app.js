@@ -11,6 +11,7 @@
 
 	angular
 		.module('nb.carousel.demo', [
+			'angularStats',
 			'pasvaz.bindonce',
 			'nb.carousel',
 			'nb.picturefill'
@@ -20,6 +21,16 @@
 
 	MainController.$inject = ['$scope'];
 	function MainController ($scope) {
+		var ngStats = showAngularStats({
+			position: 'topright'
+		});
+		ngStats.listeners.digestLength.log = function (digestLength) {
+			console.log('Digest: ' + digestLength);
+		};
+		ngStats.listeners.watchCount.log = function (watchCount) {
+			console.log('Watches: ' + watchCount);
+		};
+
 		$scope.slides = [
 			{
 				width: 720,
