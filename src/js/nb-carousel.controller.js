@@ -38,7 +38,6 @@
 		$scope.direction = self.direction = 'left';
 		$scope.currentIndex = -1;
 		$scope.isPlaying = self.isPlaying = false;
-		$scope.disabled = self.disabled = false;
 
 		/**
 		 *
@@ -225,7 +224,7 @@
 			if ($scope.slides.length === 1 || slide.active) {
 				$scope.goto($scope.slides.length - 1);
 
-				if ($scope.slides.length == 1 && !self.disabled) {
+				if ($scope.slides.length == 1) {
 					$scope.play();
 				}
 			}
@@ -319,24 +318,6 @@
 				}
 			}
 		}
-
-		// Disable (pause) the carousel if the element is hidden.
-		deregister.push($scope.$watch(function setDisabled () {
-			return $element.hasClass('ng-hide');
-		}, function (newValue) {
-			$scope.disabled = self.disabled = newValue;
-
-			if ($scope.slides.length > 0) {
-				if (newValue) {
-					$scope.pause();
-				}
-				else {
-					resize(false);
-					$scope.goto(0);
-					$scope.play();
-				}
-			}
-		}));
 
 		// Reset the timer when the interval property changes.
 		deregister.push($scope.$watch('interval', restartTimer));
