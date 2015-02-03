@@ -11,7 +11,6 @@
 
 	angular
 		.module('nb.carousel', [
-			'pasvaz.bindonce',
 			'ngAnimate',
 			'nb.gsap',
 			'nb.lodash',
@@ -125,7 +124,6 @@
 		var self = this;
 		var $$window = angular.element($window);
 		var deregister = [];
-		var timeouts = [];
 		var currentInterval; // promise
 
 		var deferGotoInterval; // promise
@@ -133,9 +131,8 @@
 		var deferGotoDirection;
 
 		var skipAnimation = true; // Prevents slide transition during the first goto()
-		var destroyed = false; // Whether the scope has been destroyed.
-
-		var transition; // function
+		var isDestroyed = false; // Whether the scope has been destroyed.
+		var isTransitioning = false; // Whether there is a transition in progress.
 
 		var oldSlide; // scope
 		var newSlide; // scope
@@ -167,7 +164,7 @@
 			cancelDeferGoto();
 
 			// Stop here if there is a transition in progress or if the index has not changed.
-			if (transition || $scope.currentIndex === index) {
+			if (isTransitioning || $scope.currentIndex === index) {
 				return;
 			}
 
@@ -198,20 +195,42 @@
 				gotoDone();
 			}
 			else {
-				timeouts.push($timeout(function () {
+				$timeout(function () {
 					// Stop here if the scope has been destroyed.
-					if (destroyed) {
+					if (isDestroyed) {
 						return;
 					}
+
+					isTransitioning = true;
 
 					// Force reflow.
 					var reflow = newSlide.$element[0].offsetWidth;
 
 					$animate.removeClass(oldSlide.$element, 'active', angular.noop);
-					$animate.addClass(newSlide.$element, 'active', doTransition(gotoDone));
-				}));
+					$animate.addClass(newSlide.$element, 'active', gotoDone)
+						.then(function () {
+							isTransitioning = false;
+						});
+				});
 			}
 		};
+
+		/**
+		 * Callback function fired after transition has been completed.
+		 */
+		function gotoDone () {
+			// Stop here if the scope has been destroyed.
+			if (isDestroyed) {
+				return;
+			}
+
+			if (oldSlide) {
+				oldSlide.$element.removeClass('active');
+			}
+			if (newSlide) {
+				newSlide.$element.addClass('active');
+			}
+		}
 
 		/**
 		 *
@@ -243,38 +262,6 @@
 				$interval.cancel(deferGotoInterval);
 				deferGotoInterval = null;
 			}
-		}
-
-		/**
-		 * Callback function fired after transition has been completed.
-		 */
-		function gotoDone () {
-			if (oldSlide) {
-				oldSlide.$element.removeClass('active');
-			}
-			if (newSlide) {
-				newSlide.$element.addClass('active');
-			}
-		}
-
-		/**
-		 * Fires callback function after transition has been completed.
-		 *
-		 * @param {Function} callback
-		 * @returns {Function}
-		 */
-		function doTransition (callback) {
-			// We keep track of the current transition to prevent simultaneous transitions.
-			transition = callback;
-
-			return function () {
-				// Stop here if the scope has been destroyed.
-				if (destroyed) {
-					return;
-				}
-				transition();
-				transition = null;
-			};
 		}
 
 		/**
@@ -432,7 +419,7 @@
 					$element.css('height', height + 'px');
 
 					// Set width and height of slides.
-					angular.forEach($scope.slides, function (slide) {
+					angular.forEach($scope.slides, function (slide, index) {
 						slide.resize(width, height);
 					});
 				}
@@ -479,16 +466,11 @@
 		$$window.on('resize', onWindowResize);
 
 		$scope.$on('$destroy', function () {
-			destroyed = true;
+			isDestroyed = true;
 
 			// Deregister watches.
 			angular.forEach(deregister, function (fn) {
 				fn();
-			});
-
-			// Cancel timeouts.
-			angular.forEach(timeouts, function (promise) {
-				$timeout.cancel(promise);
 			});
 
 			// Cancel deferred goto interval.
@@ -676,32 +658,64 @@
 		.module('nb.carousel')
 		.directive('nbCarouselSlidePicture', nbCarouselSlidePictureDirective);
 
-	nbCarouselSlidePictureDirective.$inject = ['_'];
-	function nbCarouselSlidePictureDirective (_) {
+	nbCarouselSlidePictureDirective.$inject = ['_', '$q'];
+	function nbCarouselSlidePictureDirective (_, $q) {
 		return {
 			restrict: 'EA',
 			link: function (scope, element, attrs) {
+				var resizeWatch;
+
 				scope.sourceWidth = 0;
 				scope.sourceHeight = 0;
 
+				function doResize (inWidth, inHeight, outWidth, outHeight) {
+					var scaled = _.scale(inWidth, inHeight, outWidth, outHeight);
+					element.css({
+						left: scaled.x + 'px',
+						top: scaled.y + 'px',
+						width: scaled.width + 'px',
+						height: scaled.height + 'px'
+					});
+				}
+
 				scope.resize = function (width, height) {
+					// Cancel a deferred resize, in any.
+					if (resizeWatch) {
+						resizeWatch();
+					}
+
 					if (scope.sourceWidth && scope.sourceHeight) {
-						var scaled = _.scale(scope.sourceWidth, scope.sourceHeight, width, height);
-						element.css({
-							left: scaled.x + 'px',
-							top: scaled.y + 'px',
-							width: scaled.width + 'px',
-							height: scaled.height + 'px'
+						doResize(scope.sourceWidth, scope.sourceHeight, width, height);
+					}
+					// If sourceWidth or sourceHeight is not already set, then defer resize until both are set.
+					else {
+						resizeWatch = scope.$watch(function () {
+							return {
+								sourceWidth: scope.sourceWidth,
+								sourceHeight: scope.sourceHeight
+							};
+						}, function (newValue, oldValue, scope) {
+							if (newValue.sourceWidth && newValue.sourceHeight) {
+								doResize(newValue.sourceWidth, newValue.sourceHeight, width, height);
+								resizeWatch();
+								resizeWatch = null;
+							}
 						});
 					}
 				};
 
-				attrs.$observe('source-width', function (value) {
+				scope.$on('$destroy', function () {
+					if (resizeWatch) {
+						resizeWatch();
+					}
+				});
+
+				attrs.$observe('sourceWidth', function (value) {
 					if (value) {
 						scope.sourceWidth = Number(value);
 					}
 				});
-				attrs.$observe('source-height', function (value) {
+				attrs.$observe('sourceHeight', function (value) {
 					if (value) {
 						scope.sourceHeight = Number(value);
 					}
@@ -738,14 +752,14 @@ angular.module("templates/nb-carousel.html", []).run(["$templateCache", function
     "	<a class=\"left carousel-control\"\n" +
     "	   ng-click=\"prev()\"\n" +
     "	   ng-show=\"slides.length > 1\">\n" +
-    "		<span nb-icon\n" +
+    "		<span nb-icon-once\n" +
     "			  data-id=\"arrow-left\"\n" +
     "			  data-color=\"blue\"></span>\n" +
     "	</a>\n" +
     "	<a class=\"right carousel-control\"\n" +
     "	   ng-click=\"next()\"\n" +
     "	   ng-show=\"slides.length > 1\">\n" +
-    "		<span nb-icon\n" +
+    "		<span nb-icon-once\n" +
     "			  data-id=\"arrow-right\"\n" +
     "			  data-color=\"blue\"></span>\n" +
     "	</a>\n" +

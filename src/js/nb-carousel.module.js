@@ -11,7 +11,6 @@
 
 	angular
 		.module('nb.carousel', [
-			'pasvaz.bindonce',
 			'ngAnimate',
 			'nb.gsap',
 			'nb.lodash',

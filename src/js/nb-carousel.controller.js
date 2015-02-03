@@ -18,7 +18,6 @@
 		var self = this;
 		var $$window = angular.element($window);
 		var deregister = [];
-		var timeouts = [];
 		var currentInterval; // promise
 
 		var deferGotoInterval; // promise
@@ -26,9 +25,8 @@
 		var deferGotoDirection;
 
 		var skipAnimation = true; // Prevents slide transition during the first goto()
-		var destroyed = false; // Whether the scope has been destroyed.
-
-		var transition; // function
+		var isDestroyed = false; // Whether the scope has been destroyed.
+		var isTransitioning = false; // Whether there is a transition in progress.
 
 		var oldSlide; // scope
 		var newSlide; // scope
@@ -60,7 +58,7 @@
 			cancelDeferGoto();
 
 			// Stop here if there is a transition in progress or if the index has not changed.
-			if (transition || $scope.currentIndex === index) {
+			if (isTransitioning || $scope.currentIndex === index) {
 				return;
 			}
 
@@ -91,20 +89,42 @@
 				gotoDone();
 			}
 			else {
-				timeouts.push($timeout(function () {
+				$timeout(function () {
 					// Stop here if the scope has been destroyed.
-					if (destroyed) {
+					if (isDestroyed) {
 						return;
 					}
+
+					isTransitioning = true;
 
 					// Force reflow.
 					var reflow = newSlide.$element[0].offsetWidth;
 
 					$animate.removeClass(oldSlide.$element, 'active', angular.noop);
-					$animate.addClass(newSlide.$element, 'active', doTransition(gotoDone));
-				}));
+					$animate.addClass(newSlide.$element, 'active', gotoDone)
+						.then(function () {
+							isTransitioning = false;
+						});
+				});
 			}
 		};
+
+		/**
+		 * Callback function fired after transition has been completed.
+		 */
+		function gotoDone () {
+			// Stop here if the scope has been destroyed.
+			if (isDestroyed) {
+				return;
+			}
+
+			if (oldSlide) {
+				oldSlide.$element.removeClass('active');
+			}
+			if (newSlide) {
+				newSlide.$element.addClass('active');
+			}
+		}
 
 		/**
 		 *
@@ -136,38 +156,6 @@
 				$interval.cancel(deferGotoInterval);
 				deferGotoInterval = null;
 			}
-		}
-
-		/**
-		 * Callback function fired after transition has been completed.
-		 */
-		function gotoDone () {
-			if (oldSlide) {
-				oldSlide.$element.removeClass('active');
-			}
-			if (newSlide) {
-				newSlide.$element.addClass('active');
-			}
-		}
-
-		/**
-		 * Fires callback function after transition has been completed.
-		 *
-		 * @param {Function} callback
-		 * @returns {Function}
-		 */
-		function doTransition (callback) {
-			// We keep track of the current transition to prevent simultaneous transitions.
-			transition = callback;
-
-			return function () {
-				// Stop here if the scope has been destroyed.
-				if (destroyed) {
-					return;
-				}
-				transition();
-				transition = null;
-			};
 		}
 
 		/**
@@ -325,7 +313,7 @@
 					$element.css('height', height + 'px');
 
 					// Set width and height of slides.
-					angular.forEach($scope.slides, function (slide) {
+					angular.forEach($scope.slides, function (slide, index) {
 						slide.resize(width, height);
 					});
 				}
@@ -372,16 +360,11 @@
 		$$window.on('resize', onWindowResize);
 
 		$scope.$on('$destroy', function () {
-			destroyed = true;
+			isDestroyed = true;
 
 			// Deregister watches.
 			angular.forEach(deregister, function (fn) {
 				fn();
-			});
-
-			// Cancel timeouts.
-			angular.forEach(timeouts, function (promise) {
-				$timeout.cancel(promise);
 			});
 
 			// Cancel deferred goto interval.
