@@ -54,6 +54,7 @@
 	left: 0;
 	width: 50%;
 	height: 100%;
+	z-index: 20;
 }
 
 .carousel-control.right {
