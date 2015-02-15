@@ -121,6 +121,7 @@
 
 	nbCarouselController.$inject = ['$scope', '$element', '$timeout', '$interval', '$animate', 'GSAP', '$window', 'nbWindow', '_'];
 	function nbCarouselController ($scope, $element, $timeout, $interval, $animate, GSAP, $window, nbWindow, _) {
+		/*jshint validthis: true */
 		var self = this;
 		var $$window = angular.element($window);
 		var deregister = [];
@@ -159,7 +160,7 @@
 		 * @param {int} index
 		 * @param {string} direction left, right
 		 */
-		$scope.goto = function (index, direction) {
+		$scope.gotoIndex = function (index, direction) {
 			cancelDeferGoto();
 
 			// Stop here if there is a transition in progress or if the index has not changed.
@@ -249,7 +250,7 @@
 			cancelDeferGoto();
 
 			if ($scope.slides[deferGotoIndex].complete) {
-				$scope.goto(deferGotoIndex, deferGotoDirection);
+				$scope.gotoIndex(deferGotoIndex, deferGotoDirection);
 			}
 			else {
 				deferGotoInterval = $interval(deferGotoFn, 50);
@@ -268,7 +269,7 @@
 		 */
 		$scope.prev = function () {
 			var newIndex = $scope.currentIndex > 0 ? $scope.currentIndex - 1 : $scope.slides.length - 1;
-			$scope.goto(newIndex, 'left');
+			$scope.gotoIndex(newIndex, 'left');
 		};
 
 		/**
@@ -276,7 +277,7 @@
 		 */
 		$scope.next = function () {
 			var newIndex = $scope.currentIndex < $scope.slides.length - 1 ? $scope.currentIndex + 1 : 0;
-			$scope.goto(newIndex, 'right');
+			$scope.gotoIndex(newIndex, 'right');
 		};
 
 		function restartTimer () {
@@ -328,7 +329,7 @@
 			$scope.slides.push(slide);
 
 			if ($scope.slides.length === 1 || slide.active) {
-				$scope.goto($scope.slides.length - 1);
+				$scope.gotoIndex($scope.slides.length - 1);
 
 				if ($scope.slides.length == 1) {
 					$scope.play();
@@ -351,10 +352,10 @@
 
 			if ($scope.slides.length > 0 && slide.active) {
 				if (index >= $scope.slides.length) {
-					$scope.goto(index - 1);
+					$scope.gotoIndex(index - 1);
 				}
 				else {
-					$scope.goto(index);
+					$scope.gotoIndex(index);
 				}
 			}
 			else if ($scope.currentIndex > index) {
@@ -521,7 +522,7 @@
 		};
 		return {
 			set: function (values) {
-				config = window.merge(true, config, values);
+				_.merge(config, values);
 			},
 			$get: function () {
 				return config;
