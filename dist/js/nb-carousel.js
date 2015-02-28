@@ -490,7 +490,7 @@
 			controller: 'nbCarouselController',
 			templateUrl: 'templates/nb-carousel.html',
 			scope: {
-				interval: '=',
+				interval: '@',
 				noTransition: '=',
 				noPause: '=',
 				transitionDuration: '@?',
