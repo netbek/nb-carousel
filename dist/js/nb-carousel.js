@@ -40,7 +40,7 @@
 		return {
 			addClass: function (element, className, done) {
 				var scope = element.isolateScope();
-				var duration = scope.transitionDuration();
+				var duration = scope.transitionDuration() / 1000;
 				var ease = scope.transitionEase();
 
 				if (className == 'fade-in') {
@@ -79,7 +79,7 @@
 			},
 			removeClass: function (element, className, done) {
 				var scope = element.isolateScope();
-				var duration = scope.transitionDuration();
+				var duration = scope.transitionDuration() / 1000;
 				var ease = scope.transitionEase();
 
 				if (className == 'active') {
@@ -517,7 +517,7 @@
 
 	function nbCarouselConfig () {
 		var config = {
-			transitionDuration: 1,
+			transitionDuration: 1000,
 			transitionEase: 'easeNoneLinear'
 		};
 		return {

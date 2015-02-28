@@ -15,7 +15,7 @@
 
 	function nbCarouselConfig () {
 		var config = {
-			transitionDuration: 1,
+			transitionDuration: 1000,
 			transitionEase: 'easeNoneLinear'
 		};
 		return {
