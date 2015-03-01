@@ -8,7 +8,7 @@
 	<ol class="carousel-indicators" ng-show="slides.length > 1">
 		<li ng-repeat="slide in slides track by $index"
 			ng-class="{active: isCurrentSlideIndex($index)}"
-			ng-click="goto($index);"></li>
+			ng-click="gotoIndex($index);"></li>
 	</ol>
 
 	<div ng-hide="complete" nb-throbber></div>
