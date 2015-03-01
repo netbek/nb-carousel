@@ -45,7 +45,7 @@
 					picture.resize(width, height);
 				};
 
-				// One-time watches.
+				// One-time watchers.
 				(function () {
 					var watch = picture.$watch('complete', function (value) {
 						if (value) {
@@ -76,7 +76,7 @@
 				})();
 
 				scope.$on('$destroy', function () {
-					// Deregister watches.
+					// Deregister watchers.
 					angular.forEach(deregister, function (fn) {
 						fn();
 					});

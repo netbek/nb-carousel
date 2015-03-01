@@ -19,22 +19,24 @@
 		var self = this;
 		var $$window = angular.element($window);
 		var deregister = [];
-		var currentInterval; // promise
+		var currentInterval; // {Promise}
 
-		var deferGotoInterval; // promise
+		var deferGotoInterval; // {Promise}
 		var deferGotoIndex;
 		var deferGotoDirection;
 
-		var skipAnimation = true; // Prevents slide transition during the first goto()
-		var isDestroyed = false; // Whether the scope has been destroyed.
-		var isTransitioning = false; // Whether there is a transition in progress.
+		var flags = {
+			skipAnimation: true, // {Boolean} Prevents slide transition during the first gotoIndex().
+			destroyed: false, // {Boolean} Whether the scope has been destroyed.
+			transitioning: false // {Boolean} Whether there is a transition in progress.
+		};
 
-		var oldSlide; // scope
-		var newSlide; // scope
+		var oldSlide; // {Scope}
+		var newSlide; // {Scope}
 
 		var maxWidth = 0, maxHeight = 0;
 
-		$scope.complete = false; // Whether all slides have loaded or failed to load.
+		$scope.complete = false; // {Boolean} Whether all slides have loaded or failed to load.
 		$scope.slides = [];
 		$scope.direction = self.direction = 'left';
 		$scope.currentIndex = -1;
@@ -58,7 +60,7 @@
 			cancelDeferGoto();
 
 			// Stop here if there is a transition in progress or if the index has not changed.
-			if (isTransitioning || $scope.currentIndex === index) {
+			if (flags.transitioning || $scope.currentIndex === index) {
 				return;
 			}
 
@@ -67,7 +69,7 @@
 
 			// Stop here if the slide is not loaded.
 			if (!newSlide.complete) {
-				// Periodically check if the slide is loaded, and then try goto() again.
+				// Periodically check if the slide is loaded, and then try gotoIndex() again.
 				deferGoto(index, direction);
 				return;
 			}
@@ -84,18 +86,18 @@
 			// Reset the timer when changing slides.
 			restartTimer();
 
-			if (skipAnimation || $scope.noTransition) {
-				skipAnimation = false;
+			if (flags.skipAnimation || $scope.noTransition) {
+				flags.skipAnimation = false;
 				gotoDone();
 			}
 			else {
 				$timeout(function () {
 					// Stop here if the scope has been destroyed.
-					if (isDestroyed) {
+					if (flags.destroyed) {
 						return;
 					}
 
-					isTransitioning = true;
+					flags.transitioning = true;
 
 					// Force reflow.
 					var reflow = newSlide.$element[0].offsetWidth;
@@ -103,7 +105,7 @@
 					$animate.removeClass(oldSlide.$element, 'active', angular.noop);
 					$animate.addClass(newSlide.$element, 'active', gotoDone)
 						.then(function () {
-							isTransitioning = false;
+							flags.transitioning = false;
 						});
 				});
 			}
@@ -114,7 +116,7 @@
 		 */
 		function gotoDone () {
 			// Stop here if the scope has been destroyed.
-			if (isDestroyed) {
+			if (flags.destroyed) {
 				return;
 			}
 
@@ -138,7 +140,7 @@
 		}
 
 		/**
-		 * Periodically checks if a slide is loaded. If so, fires goto().
+		 * Periodically checks if a slide is loaded. If so, fires gotoIndex().
 		 */
 		function deferGotoFn () {
 			cancelDeferGoto();
@@ -342,9 +344,9 @@
 		$$window.on('resize', onWindowResize);
 
 		$scope.$on('$destroy', function () {
-			isDestroyed = true;
+			flags.destroyed = true;
 
-			// Deregister watches.
+			// Deregister watchers.
 			angular.forEach(deregister, function (fn) {
 				fn();
 			});
