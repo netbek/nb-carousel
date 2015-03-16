@@ -27,7 +27,7 @@
     "nb-gsap": "https://github.com/netbek/nb-gsap.git#master",
     "nb-lodash": "https://github.com/netbek/nb-lodash.git#master",
     "nb-modernizr": "https://github.com/netbek/nb-modernizr.git#master",
-    "nb-picturefill": "https://github.com/netbek/nb-picturefill.git#master",
+    "nb-picture": "https://github.com/netbek/nb-picture.git#master",
     "nb-throbber": "https://github.com/netbek/nb-throbber.git#master",
     "nb-window": "https://github.com/netbek/nb-window.git#master"
   },

@@ -13,7 +13,7 @@
 		.module('nb.carousel.demo', [
 			'angularStats',
 			'nb.carousel',
-			'nb.picturefill'
+			'nb.picture'
 		])
 		.controller('MainController', MainController)
 		.run(runBlock);
