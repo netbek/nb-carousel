@@ -35,6 +35,7 @@
 	display: block;
 }
 
+.carousel-inner .slide .picture,
 .carousel-inner .slide picture {
 	display: block;
 	position: absolute;
