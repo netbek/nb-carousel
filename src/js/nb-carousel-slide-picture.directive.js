@@ -13,12 +13,12 @@
 		.module('nb.carousel')
 		.directive('nbCarouselSlidePicture', nbCarouselSlidePictureDirective);
 
-	nbCarouselSlidePictureDirective.$inject = ['_', '$q'];
-	function nbCarouselSlidePictureDirective (_, $q) {
+	nbCarouselSlidePictureDirective.$inject = ['_', '$q', 'nbPictureService'];
+	function nbCarouselSlidePictureDirective (_, $q, nbPictureService) {
 		return {
 			restrict: 'EA',
 			link: function (scope, element, attrs) {
-				var resizeWatch;
+				var resizeWatch = angular.noop;
 
 				scope.sourceWidth = 0;
 				scope.sourceHeight = 0;
@@ -35,9 +35,7 @@
 
 				scope.resize = function (width, height) {
 					// Cancel a deferred resize, in any.
-					if (resizeWatch) {
-						resizeWatch();
-					}
+					resizeWatch();
 
 					if (scope.sourceWidth && scope.sourceHeight) {
 						doResize(scope.sourceWidth, scope.sourceHeight, width, height);
@@ -53,16 +51,14 @@
 							if (newValue.sourceWidth && newValue.sourceHeight) {
 								doResize(newValue.sourceWidth, newValue.sourceHeight, width, height);
 								resizeWatch();
-								resizeWatch = null;
+								resizeWatch = angular.noop;
 							}
 						});
 					}
 				};
 
 				scope.$on('$destroy', function () {
-					if (resizeWatch) {
-						resizeWatch();
-					}
+					resizeWatch();
 				});
 
 				attrs.$observe('sourceWidth', function (value) {

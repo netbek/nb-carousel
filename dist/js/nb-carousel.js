@@ -14,6 +14,7 @@
 			'ngAnimate',
 			'nb.gsap',
 			'nb.lodash',
+			'nb.picture',
 			'nb.throbber',
 			'nb.window',
 			'nb.carousel.templates'
@@ -560,7 +561,7 @@
 			},
 			link: function (scope, element, attrs, controller) {
 				var deregister = [];
-				var picture = element.find('picture').scope();
+				var pictureScope = element.find('picture').scope();
 
 				scope.complete = false; // Whether image has loaded or failed to load.
 
@@ -577,12 +578,12 @@
 
 				// Sets width and height of slide picture.
 				scope.resize = function (width, height) {
-					picture.resize(width, height);
+					pictureScope.resize(width, height);
 				};
 
 				// One-time watchers.
 				(function () {
-					var watch = picture.$watch('complete', function (value) {
+					var watch = pictureScope.$watch('picture.$$complete', function (value) {
 						if (value) {
 							scope.complete = value;
 							controller.setSlideComplete(scope);
@@ -592,7 +593,7 @@
 					deregister.push(watch);
 				})();
 				(function () {
-					var watch = picture.$watch('sourceWidth', function (value) {
+					var watch = pictureScope.$watch('sourceWidth', function (value) {
 						if (value) {
 							controller.setMaxWidth(value);
 							watch();
@@ -601,7 +602,7 @@
 					deregister.push(watch);
 				})();
 				(function () {
-					var watch = picture.$watch('sourceHeight', function (value) {
+					var watch = pictureScope.$watch('sourceHeight', function (value) {
 						if (value) {
 							controller.setMaxHeight(value);
 							watch();
@@ -642,12 +643,12 @@
 		.module('nb.carousel')
 		.directive('nbCarouselSlidePicture', nbCarouselSlidePictureDirective);
 
-	nbCarouselSlidePictureDirective.$inject = ['_', '$q'];
-	function nbCarouselSlidePictureDirective (_, $q) {
+	nbCarouselSlidePictureDirective.$inject = ['_', '$q', 'nbPictureService'];
+	function nbCarouselSlidePictureDirective (_, $q, nbPictureService) {
 		return {
 			restrict: 'EA',
 			link: function (scope, element, attrs) {
-				var resizeWatch;
+				var resizeWatch = angular.noop;
 
 				scope.sourceWidth = 0;
 				scope.sourceHeight = 0;
@@ -664,9 +665,7 @@
 
 				scope.resize = function (width, height) {
 					// Cancel a deferred resize, in any.
-					if (resizeWatch) {
-						resizeWatch();
-					}
+					resizeWatch();
 
 					if (scope.sourceWidth && scope.sourceHeight) {
 						doResize(scope.sourceWidth, scope.sourceHeight, width, height);
@@ -682,16 +681,14 @@
 							if (newValue.sourceWidth && newValue.sourceHeight) {
 								doResize(newValue.sourceWidth, newValue.sourceHeight, width, height);
 								resizeWatch();
-								resizeWatch = null;
+								resizeWatch = angular.noop;
 							}
 						});
 					}
 				};
 
 				scope.$on('$destroy', function () {
-					if (resizeWatch) {
-						resizeWatch();
-					}
+					resizeWatch();
 				});
 
 				attrs.$observe('sourceWidth', function (value) {

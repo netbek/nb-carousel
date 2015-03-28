@@ -14,6 +14,7 @@
 			'ngAnimate',
 			'nb.gsap',
 			'nb.lodash',
+			'nb.picture',
 			'nb.throbber',
 			'nb.window',
 			'nb.carousel.templates'

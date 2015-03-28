@@ -25,7 +25,7 @@
 			},
 			link: function (scope, element, attrs, controller) {
 				var deregister = [];
-				var picture = element.find('picture').scope();
+				var pictureScope = element.find('picture').scope();
 
 				scope.complete = false; // Whether image has loaded or failed to load.
 
@@ -42,12 +42,12 @@
 
 				// Sets width and height of slide picture.
 				scope.resize = function (width, height) {
-					picture.resize(width, height);
+					pictureScope.resize(width, height);
 				};
 
 				// One-time watchers.
 				(function () {
-					var watch = picture.$watch('complete', function (value) {
+					var watch = pictureScope.$watch('picture.$$complete', function (value) {
 						if (value) {
 							scope.complete = value;
 							controller.setSlideComplete(scope);
@@ -57,7 +57,7 @@
 					deregister.push(watch);
 				})();
 				(function () {
-					var watch = picture.$watch('sourceWidth', function (value) {
+					var watch = pictureScope.$watch('sourceWidth', function (value) {
 						if (value) {
 							controller.setMaxWidth(value);
 							watch();
@@ -66,7 +66,7 @@
 					deregister.push(watch);
 				})();
 				(function () {
-					var watch = picture.$watch('sourceHeight', function (value) {
+					var watch = pictureScope.$watch('sourceHeight', function (value) {
 						if (value) {
 							controller.setMaxHeight(value);
 							watch();
