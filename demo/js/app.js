@@ -14,6 +14,27 @@
 			'angularStats',
 			'nb.carousel'
 		])
+		.config(['nbPictureConfigProvider',
+			function (nbPictureConfigProvider) {
+				nbPictureConfigProvider.set({
+					mediaqueries: {
+						small: '(min-width: 0px)',
+						medium: '(min-width: 640px)',
+						large: '(min-width: 992px)',
+						xlarge: '(min-width: 1440px)',
+						xxlarge: '(min-width: 1920px)',
+						landscape: '(orientation: landscape)',
+						portrait: '(orientation: portrait)',
+						// http://css-tricks.com/snippets/css/retina-display-media-query
+						retina: '(-webkit-min-device-pixel-ratio: 2), ' +
+							'(min--moz-device-pixel-ratio: 2), ' +
+							'(-o-min-device-pixel-ratio: 2/1), ' +
+							'(min-device-pixel-ratio: 2), ' +
+							'(min-resolution: 192dpi), ' +
+							'(min-resolution: 2dppx)'
+					}
+				});
+			}])
 		.controller('MainController', MainController)
 		.run(runBlock);
 
